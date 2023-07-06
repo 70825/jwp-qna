@@ -10,10 +10,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class StationRepositoryTest {
 
-    private StationRepository stations; // 컬렉셜과 역할이 비슷함. 컬렉션 친화적임
+    private final StationRepository stations; // 컬렉션과 역할이 비슷함. 컬렉션 친화적임
+    private final LineRepository lines;
 
-    public StationRepositoryTest(final StationRepository stations) {
+    public StationRepositoryTest(final StationRepository stations,
+                                 final LineRepository lines) {
         this.stations = stations;
+        this.lines = lines;
     }
 
     @Test
@@ -52,5 +55,41 @@ class StationRepositoryTest {
         station1.changeName("선릉역");
         final Station station2 = stations.findByName("선릉역");
         assertThat(station2).isNotNull();
+    }
+
+    @Test
+    void saveWithLine() {
+        final Station expected = new Station("선릉역");
+        expected.setLine(lines.save(new Line("2호선")));
+        final Station actual = stations.save(expected);
+        stations.flush();
+    }
+
+    @Test
+    void findByNameWithLine() {
+        final Station actual = stations.findByName("교대역");
+        assertThat(actual).isNotNull();
+        assertThat(actual.getLine()).isNotNull();
+    }
+
+    @Test
+    void updateWithLine() {
+        final Station expected = stations.findByName("교대역");
+        expected.setLine(lines.save(new Line("2호선")));
+        stations.flush();
+    }
+
+    @Test
+    void removeLineInStation() {
+        final Station expected = stations.findByName("교대역");
+        expected.setLine(null); // 객체 중심으로 생각하기 -> null을 넣으면 Line을 가지지 않게 된다.
+        stations.flush();
+    }
+
+    @Test
+    void removeLine() {
+        final Line line = lines.findByName("3호선");
+        lines.delete(line);
+        lines.flush();
     }
 }

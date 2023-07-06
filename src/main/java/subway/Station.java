@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity // (1)
@@ -16,6 +18,10 @@ public class Station {
 
     @Column(name = "name", unique = true, nullable = false) // (5)
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "line_id")
+    private Line line;
 
     protected Station() { // (6)
     }
@@ -32,7 +38,15 @@ public class Station {
         return name;
     }
 
+    public Line getLine() {
+        return line;
+    }
+
     public void changeName(final String name) {
         this.name = name;
+    }
+
+    public void setLine(final Line line) {
+        this.line = line;
     }
 }
